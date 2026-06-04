@@ -2,7 +2,6 @@
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_quickbooks_suppression.dart';
 
@@ -52,45 +51,58 @@ Future<T> tracedQuickBooks<T>({
   final t = tracer ?? OTel.tracerProvider().getTracer('otel_quickbooks');
   final span = t.startSpan('qbo $operation', kind: SpanKind.client);
   try {
-    span.setStringAttribute('rpc.system', 'quickbooks');
+    span.addAttributes(
+        OTel.attributes([OTel.attributeString('rpc.system', 'quickbooks')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.realmId != null) {
-        span.setStringAttribute('quickbooks.realm.id', res.realmId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('quickbooks.realm.id', res.realmId!)]));
       }
       if (res.entity != null) {
-        span.setStringAttribute('quickbooks.entity', res.entity!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('quickbooks.entity', res.entity!)]));
       }
       if (res.entityId != null) {
-        span.setStringAttribute('quickbooks.entity.id', res.entityId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('quickbooks.entity.id', res.entityId!)]));
       }
       if (res.customerId != null) {
-        span.setStringAttribute('quickbooks.customer.id', res.customerId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('quickbooks.customer.id', res.customerId!)]));
       }
       if (res.vendorId != null) {
-        span.setStringAttribute('quickbooks.vendor.id', res.vendorId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('quickbooks.vendor.id', res.vendorId!)]));
       }
       if (res.invoiceId != null) {
-        span.setStringAttribute('quickbooks.invoice.id', res.invoiceId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('quickbooks.invoice.id', res.invoiceId!)]));
       }
       if (res.amount != null) {
-        span.setDoubleAttribute('quickbooks.amount', res.amount!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeDouble('quickbooks.amount', res.amount!)]));
       }
       if (res.currency != null) {
-        span.setStringAttribute('quickbooks.currency', res.currency!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('quickbooks.currency', res.currency!)]));
       }
       if (res.statusCode != null) {
-        span.setIntAttribute('http.response.status_code', res.statusCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
       }
       if (res.errorCode != null) {
-        span.setStringAttribute('qbo.error.code', res.errorCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('qbo.error.code', res.errorCode!)]));
       }
       final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.setStringAttribute(
-            ErrorResource.errorType.key, res.errorCode ?? 'qbo.error');
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString(
+              ErrorResource.errorType.key, res.errorCode ?? 'qbo.error')
+        ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
     }
